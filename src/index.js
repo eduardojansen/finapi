@@ -10,17 +10,40 @@ const customers = [];
 app.post("/account", (request, response) => {
   const { cpf, name } = request.body;
 
+  const customerAlreadyExists = customers.some(
+    (customer) => customer.cpf === cpf
+  );
+
+  if(customerAlreadyExists){
+    return response.status(400).json({
+      error: "Customer alterady exists!"
+    })
+  }
+
   const id = uuidv4();
 
   customers.push({
     cpf,
     name,
-    id,
+    id: uuidv4(),
     statement: []
   });
 
   return response.status(201).send();
 
 });
+
+app.get("/statement", (request, response) => {
+  const { cpf } = request.headers;
+
+  const customer = customers.find((customer) => customer.cpf === cpf);
+
+  if(!customer){
+    return response.status(404).json({error: "Customer not found"});
+  }
+
+  return response.json(customer);
+});
+
 
 app.listen(3333)
