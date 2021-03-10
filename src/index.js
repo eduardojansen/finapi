@@ -48,8 +48,6 @@ app.post("/account", (request, response) => {
     })
   }
 
-  const id = uuidv4();
-
   customers.push({
     cpf,
     name,
