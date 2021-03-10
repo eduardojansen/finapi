@@ -109,11 +109,29 @@ app.post("/withdraw", verifyIfExistsAccountCPF, (request, response) => {
     created_at: new Date(),
     type: "debit"
   }
-console.log(statementOperation)
+
   customer.statement.push(statementOperation);
 
   return response.status(201).send();
 
+});
+
+app.get("/statement/date", verifyIfExistsAccountCPF, (request, response) => {
+
+  const { customer } = request;
+  const { date } = request.query;
+
+  const dateFilter = new Date(date + " 00:00");
+  console.log(dateFilter, date)
+
+  const statement = customer.statement.filter(
+    (statement) => 
+      statement.created_at.toDateString() === 
+      dateFilter.toDateString()
+  );
+
+
+  return response.json(statement);
 });
 
 
