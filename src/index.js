@@ -7,6 +7,23 @@ app.use(express.json());
 
 const customers = [];
 
+// Middleware
+function verifyIfExistsAccountCPF(request, response, next) {
+  const { cpf } = request.headers;
+
+  const customer = customers.find((customer) => customer.cpf === cpf);
+
+  // Repassando dado para que possa ser aproveitado pelas rotas que utilizam esse middleware
+  request.customer = customer;
+
+  if(!customer){
+    return response.status(404).json({error: "Customer not found"});
+  }
+
+  return next();
+}
+
+
 app.post("/account", (request, response) => {
   const { cpf, name } = request.body;
 
@@ -33,14 +50,16 @@ app.post("/account", (request, response) => {
 
 });
 
-app.get("/statement", (request, response) => {
-  const { cpf } = request.headers;
 
-  const customer = customers.find((customer) => customer.cpf === cpf);
+/**
+ * Maneiras para adicionar os middlewares:
+ * 1ª - Informar como parâmetro de rota separando por vírgulas.
+ * 2ª - Adicionar em todas as rotas usando app.use(MiddlewareName)
+ */
+app.get("/statement", verifyIfExistsAccountCPF, (request, response) => {
 
-  if(!customer){
-    return response.status(404).json({error: "Customer not found"});
-  }
+  // Recuperando dado injetado no middleware
+  const { customer } = request;
 
   return response.json(customer);
 });
